@@ -2,3 +2,18 @@
 name = "alloc-benches"
 version = "0.1.0"
 edition = "2021"
+
+[features]
+virtual_alloc = ["dep:virtual_alloc"]
+
+[dependencies]
+rand = "0.9"
+rayon = "1.10"
+
+[target.'cfg(target_os = "hermit")'.dependencies]
+hermit = { git = "https://github.com/Vyquos/hermit-rs", features = ["mmap", "libc"] }
+virtual_alloc = { git = "ssh://git@github.com/Vyquos/virtual-alloc-hermit", features = ["alloc_stats"], optional = true }
+
+[[bin]]
+name = "rayon"
+path = "src/rayon_alloc.rs"
