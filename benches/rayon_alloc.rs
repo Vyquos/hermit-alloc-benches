@@ -93,16 +93,16 @@ fn bench_allocators(c: &mut Criterion) {
         .map(|n| n.get())
         .unwrap_or(1);
 
-    let keep_maxes = [0, 1, 2, 4, 8, 16, 32, 64, 128, 192, 256];
+    let keep_maxes = [0, 64, 256];
     let max_sizes  = [64*KB, 1*MB];
-    let iters      = [10_000, 50_000];
+    let iters      = [10_000, 20_000];
 
     for &max_size in &max_sizes {
         let mut group =
             c.benchmark_group(format!("rayon_boxes/max_size={}", human_bytes(max_size)));
         group.plot_config(PlotConfiguration::default().summary_scale(AxisScale::Linear));
-        group.measurement_time(Duration::from_secs(10));
-        group.sample_size(30);
+        group.measurement_time(Duration::from_secs(30));
+        group.sample_size(20);
 
         for &iters_per_task in &iters {
             for &keep_max in &keep_maxes {
