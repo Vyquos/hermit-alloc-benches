@@ -98,8 +98,15 @@ fn bench_allocators(c: &mut Criterion) {
     let iters      = [10_000, 20_000];
 
     for &max_size in &max_sizes {
-        let mut group =
-            c.benchmark_group(format!("rayon_boxes/max_size={}", human_bytes(max_size)));
+        let mut group = c.benchmark_group(format!(
+            "rayon_boxes/max_size={}/{}",
+            human_bytes(max_size),
+            if cfg!(feature = "virtual_alloc") {
+                "virtual_alloc"
+            } else {
+                "native"
+            }
+        ));
         group.plot_config(PlotConfiguration::default().summary_scale(AxisScale::Linear));
         group.measurement_time(Duration::from_secs(30));
         group.sample_size(20);
