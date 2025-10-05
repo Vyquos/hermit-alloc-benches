@@ -1053,7 +1053,7 @@ checksum = "0b928f33d975fc6ad9f86c8f283853ad26bdd5b10b7f1542aa2fa15e2289105a"
 [[package]]
 name = "virtual_alloc"
 version = "0.1.0"
-source = "git+ssh://git@github.com/Vyquos/virtual-alloc-hermit#641bb674b88980561552be8c709693d1304c25d8"
+source = "git+ssh://git@github.com/Vyquos/virtual-alloc-hermit#3c4c82cadfccf22fb11c73e38f5b2225c970b2e5"
 dependencies = [
  "ahash",
  "array-init",
