@@ -15,7 +15,7 @@ hermit = { git = "https://github.com/Vyquos/hermit-rs", features = ["mmap", "lib
 virtual_alloc = { git = "ssh://git@github.com/Vyquos/virtual-alloc-hermit", features = ["alloc_stats"], optional = true }
 
 [dev-dependencies]
-criterion = { version = "0.7", features = ["html_reports", "real_blackbox"] }
+criterion = { version = "0.7", features = ["plotters", "html_reports", "real_blackbox"], default-features = false }
 
 [[bench]]
 name = "rayon_alloc"

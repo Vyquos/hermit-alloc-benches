@@ -192,7 +192,6 @@ dependencies = [
  "num-traits",
  "oorandom",
  "plotters",
- "rayon",
  "regex",
  "serde",
  "serde_json",
