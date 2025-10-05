@@ -1,6 +1,7 @@
 #[cfg(target_os = "hermit")]
 use hermit as _;
 
+use criterion::{criterion_group, criterion_main, Criterion};
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use rayon::ThreadPoolBuilder;
 use std::time::Instant;
@@ -17,8 +18,15 @@ pub const TB: usize = GB << 10;
 #[global_allocator]
 static ALLOC: VirtualAlloc<64> = VirtualAlloc::new(7 * GB, 16 * TB);
 
+fn criterion_benchmark(c: &mut Criterion) {
+    c.bench_function("Main", |b| b.iter(|| rayon_boxes()));
+}
+
+criterion_group!(benches, criterion_benchmark);
+criterion_main!(benches);
+
 /// Parallel randomized alloc/free patterns using plain Box<Vec<u8>>.
-fn main() {
+fn rayon_boxes() {
     #[cfg(feature = "virtual_alloc")]
     {
         println!("waiting for init");

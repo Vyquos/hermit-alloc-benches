@@ -14,6 +14,9 @@ rayon = "1.10"
 hermit = { git = "https://github.com/Vyquos/hermit-rs", features = ["mmap", "libc"] }
 virtual_alloc = { git = "ssh://git@github.com/Vyquos/virtual-alloc-hermit", features = ["alloc_stats"], optional = true }
 
-[[bin]]
-name = "rayon"
-path = "benches/rayon_alloc.rs"
+[dev-dependencies]
+criterion = { version = "0.7", features = ["html_reports", "real_blackbox"] }
+
+[[bench]]
+name = "rayon_alloc"
+harness = false
