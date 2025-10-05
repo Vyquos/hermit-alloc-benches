@@ -32,7 +32,7 @@ pub const TB: usize = GB << 10;
 
 #[cfg(feature = "virtual_alloc")]
 #[global_allocator]
-static ALLOC: VirtualAlloc<64> = VirtualAlloc::new(7 * GB, 16 * TB);
+static ALLOC: VirtualAlloc<128> = VirtualAlloc::new_disabled(7 * GB, 16 * TB);
 
 fn criterion() -> Criterion {
     Criterion::default()
@@ -130,10 +130,14 @@ fn bench_allocators(c: &mut Criterion) {
                         .num_threads(params.threads)
                         .build()
                         .unwrap();
+                    ALLOC.enable();
                     b.iter(|| rayon_boxes(&pool, params));
                 });
             }
         }
         group.finish();
+
+        ALLOC.disable();
+        unsafe { ALLOC.reset_shards() };
     }
 }
