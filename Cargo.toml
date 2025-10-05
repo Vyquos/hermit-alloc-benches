@@ -16,4 +16,4 @@ virtual_alloc = { git = "ssh://git@github.com/Vyquos/virtual-alloc-hermit", feat
 
 [[bin]]
 name = "rayon"
-path = "src/rayon_alloc.rs"
+path = "benches/rayon_alloc.rs"
