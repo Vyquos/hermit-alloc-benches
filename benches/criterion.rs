@@ -1,7 +1,7 @@
 #[cfg(target_os = "hermit")]
 use hermit as _;
 
-use alloc_benches::{rayon_boxes, Params, ALLOC};
+use alloc_benches::{human_bytes, rayon_boxes, Params, ALLOC};
 #[allow(unused_imports)]
 use alloc_benches::{KB, MB, GB, TB};
 
@@ -12,16 +12,6 @@ use criterion::{
 use rayon::ThreadPoolBuilder;
 use std::path::Path;
 use std::time::Duration;
-
-fn human_bytes(n: usize) -> String {
-    if n >= MB {
-        format!("{}MiB", n / MB)
-    } else if n >= KB {
-        format!("{}KiB", n / KB)
-    } else {
-        format!("{}B", n)
-    }
-}
 
 fn criterion() -> Criterion {
     Criterion::default()

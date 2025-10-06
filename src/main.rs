@@ -1,15 +1,47 @@
 #[cfg(target_os = "hermit")]
 use hermit as _;
 
-use alloc_benches::{rayon_boxes, Params};
+use alloc_benches::{human_bytes, rayon_boxes, Params};
 #[allow(unused_imports)]
 use alloc_benches::{KB, MB, GB, TB};
 
+use clap::Parser;
 use rayon::ThreadPoolBuilder;
 use serde::Serialize;
 use std::fs::{create_dir_all, File};
 use std::io::{self, BufWriter};
 use std::time::Instant;
+
+#[derive(Clone, Copy, Debug, Parser)]
+pub struct Options {
+    #[arg(short, long)]
+    pub keep_max: Option<usize>,
+    #[arg(long)]
+    pub keep_prob: Option<f64>,
+    #[arg(short, long)]
+    pub max_size: Option<usize>,
+    #[arg(short, long)]
+    pub iters_per_task: Option<usize>,
+    #[arg(short, long)]
+    pub sample_size: Option<usize>,
+    #[arg(short, long)]
+    pub tasks: Option<usize>,
+}
+
+impl From<Options> for Params {
+    fn from(opt: Options) -> Self {
+        let defaults = Params::default();
+        Params {
+            keep_max: opt.keep_max.unwrap_or(defaults.keep_max),
+            keep_prob: opt.keep_prob.unwrap_or(defaults.keep_prob),
+            max_size: opt.max_size.unwrap_or(defaults.max_size),
+            iters_per_task: opt.iters_per_task.unwrap_or(defaults.iters_per_task),
+            sample_size: opt.sample_size.unwrap_or(defaults.sample_size),
+            tasks: opt.tasks.unwrap_or(defaults.tasks),
+            threads: defaults.threads,
+        }
+    }
+}
 
 #[derive(Clone, Debug, Serialize)]
 pub struct BenchmarkData {
@@ -20,19 +52,7 @@ pub struct BenchmarkData {
 const OUTPUT_PATH: &str = "/root/benches/manual-benches";
 
 fn main() {
-    let threads = std::thread::available_parallelism()
-        .map(|n| n.get())
-        .unwrap_or(1);
-
-    let params = Params {
-        keep_max: 128,
-        keep_prob: 0.01,
-        max_size: 1 * MB,
-        iters_per_task: 10_000,
-        sample_size: 20,
-        tasks: 2 * threads,
-        threads,
-    };
+    let params = Options::parse().into();
 
     let writer = setup_stats(params).unwrap();
 
@@ -61,7 +81,7 @@ pub fn setup_stats(params: Params) -> io::Result<BufWriter<File>> {
     let filename = format!(
         "{dirname}/rayon-bench_iter{}_max{}_keep{}.json",
         params.iters_per_task * params.tasks,
-        params.max_size,
+        human_bytes(params.max_size),
         params.keep_max
     );
     println!("creating {filename}");

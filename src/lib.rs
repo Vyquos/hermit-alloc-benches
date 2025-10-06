@@ -29,6 +29,33 @@ pub struct Params {
     pub threads: usize,
 }
 
+impl Default for Params {
+    fn default() -> Self {
+        let threads = std::thread::available_parallelism()
+            .map(|n| n.get())
+            .unwrap_or(1);
+        Params {
+            keep_max: 128,
+            keep_prob: 0.01,
+            max_size: 1 * MB,
+            iters_per_task: 10_000,
+            sample_size: 20,
+            tasks: 2 * threads,
+            threads,
+        }
+    }
+}
+
+pub fn human_bytes(n: usize) -> String {
+    if n >= MB {
+        format!("{}MiB", n / MB)
+    } else if n >= KB {
+        format!("{}KiB", n / KB)
+    } else {
+        format!("{}B", n)
+    }
+}
+
 /// Parallel randomized alloc/free patterns using plain Box<Vec<u8>>.
 pub fn rayon_boxes(pool: &rayon::ThreadPool, params: Params) {
     pool.install(|| {

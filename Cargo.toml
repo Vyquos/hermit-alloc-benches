@@ -7,6 +7,7 @@ edition = "2021"
 virtual_alloc = ["dep:virtual_alloc"]
 
 [dependencies]
+clap = { version = "4.5", features = ["derive"] }
 rand = "0.9"
 rayon = "1.10"
 serde = { version = "1.0", features = ["derive"] }
