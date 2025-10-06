@@ -1,5 +1,5 @@
 [package]
-name = "alloc-benches"
+name = "alloc_benches"
 version = "0.1.0"
 edition = "2021"
 
@@ -18,5 +18,5 @@ virtual_alloc = { git = "ssh://git@github.com/Vyquos/virtual-alloc-hermit", feat
 criterion = { version = "0.7", features = ["plotters", "html_reports", "real_blackbox"], default-features = false }
 
 [[bench]]
-name = "rayon_alloc"
+name = "criterion"
 harness = false

@@ -1,82 +1,17 @@
 #[cfg(target_os = "hermit")]
 use hermit as _;
 
+use alloc_benches::{rayon_boxes, Params, ALLOC};
+#[allow(unused_imports)]
+use alloc_benches::{KB, MB, GB, TB};
+
 use criterion::{
     criterion_group, criterion_main, AxisScale, BenchmarkId, Criterion, PlotConfiguration,
     PlottingBackend, Throughput,
 };
-use rand::{rngs::SmallRng, Rng, SeedableRng};
-use rayon::prelude::*;
 use rayon::ThreadPoolBuilder;
-use std::hint::black_box;
 use std::path::Path;
 use std::time::Duration;
-
-#[cfg(feature = "virtual_alloc")]
-use virtual_alloc::allocator::VirtualAlloc;
-
-#[derive(Clone, Copy, Debug)]
-struct Params {
-    keep_max: usize,
-    keep_prob: f64,
-    max_size: usize,
-    iters_per_task: usize,
-    tasks: usize,
-    threads: usize,
-}
-
-const KB: usize = 1 << 10;
-pub const MB: usize = KB << 10;
-pub const GB: usize = MB << 10;
-pub const TB: usize = GB << 10;
-
-#[cfg(feature = "virtual_alloc")]
-#[global_allocator]
-static ALLOC: VirtualAlloc<128> = VirtualAlloc::new_disabled(7 * GB, 16 * TB);
-
-fn criterion() -> Criterion {
-    Criterion::default()
-        .configure_from_args()
-        .plotting_backend(PlottingBackend::Plotters)
-        .output_directory(Path::new("/root/benches"))
-}
-
-criterion_group!(name = benches; config = criterion(); targets = bench_allocators);
-criterion_main!(benches);
-
-/// Parallel randomized alloc/free patterns using plain Box<Vec<u8>>.
-fn rayon_boxes(pool: &rayon::ThreadPool, params: Params) {
-    pool.install(|| {
-        (0..params.tasks).into_par_iter().for_each(|t| {
-            let mut rng = SmallRng::seed_from_u64(0xA110C ^ (t as u64));
-            let mut stash: Vec<Box<[u8]>> = Vec::with_capacity(params.keep_max.max(1));
-
-            for _ in 0..params.iters_per_task {
-                // allocate a random size
-                let sz = rng.random_range(1..=params.max_size);
-                let mut b = vec![0u8; sz].into_boxed_slice();
-                // write to memory
-                if sz >= 8 {
-                    let last = sz - 1;
-                    b[0] = 1; b[last] = 2;
-                }
-                // randomly keep some allocations
-                if rng.random_bool(params.keep_prob) {
-                    stash.push(b);
-                    // free older items
-                    if stash.len() > params.keep_max {
-                        let drop_idx = rng.random_range(0..stash.len());
-                        stash.swap_remove(drop_idx);
-                    }
-                } else {
-                    drop(b);
-                }
-            }
-            // drop leftovers
-            black_box(stash);
-        });
-    });
-}
 
 fn human_bytes(n: usize) -> String {
     if n >= MB {
@@ -87,6 +22,16 @@ fn human_bytes(n: usize) -> String {
         format!("{}B", n)
     }
 }
+
+fn criterion() -> Criterion {
+    Criterion::default()
+        .configure_from_args()
+        .plotting_backend(PlottingBackend::Plotters)
+        .output_directory(Path::new("/root/benches"))
+}
+
+criterion_group!(name = benches; config = criterion(); targets = bench_allocators);
+criterion_main!(benches);
 
 fn bench_allocators(c: &mut Criterion) {
     let threads = std::thread::available_parallelism()
