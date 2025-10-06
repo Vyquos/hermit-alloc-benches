@@ -63,6 +63,7 @@ fn bench_allocators(c: &mut Criterion) {
                     keep_prob: 0.01,
                     max_size,
                     iters_per_task,
+                    sample_size: 0,
                     tasks: 2 * threads,
                     threads,
                 };

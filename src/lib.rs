@@ -3,6 +3,7 @@ use hermit as _;
 
 use rand::{rngs::SmallRng, Rng, SeedableRng};
 use rayon::prelude::*;
+use serde::Serialize;
 use std::hint::black_box;
 
 pub const KB: usize = 1 << 10;
@@ -17,12 +18,13 @@ use virtual_alloc::allocator::VirtualAlloc;
 #[global_allocator]
 pub static ALLOC: VirtualAlloc<128> = VirtualAlloc::new_disabled(7 * GB, 16 * TB);
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Serialize)]
 pub struct Params {
     pub keep_max: usize,
     pub keep_prob: f64,
     pub max_size: usize,
     pub iters_per_task: usize,
+    pub sample_size: usize,
     pub tasks: usize,
     pub threads: usize,
 }
